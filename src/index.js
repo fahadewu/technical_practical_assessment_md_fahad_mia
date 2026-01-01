@@ -13,7 +13,7 @@ app.use(express.json());
 
 app.use('/auth', require('./routes/authRoutes'));
 app.use('/payment', require('./routes/paymentRoutes'));
-app.use('/order', require('./routes/orderRoutes'));
+app.use('/orders', require('./routes/orderRoutes'));
 
 app.get('/', (req, res) => {
     res.send('API is running...');
