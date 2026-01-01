@@ -1,0 +1,28 @@
+{
+  "name": "technical_practical_assessment_md_fahad_mia",
+  "version": "1.0.0",
+  "description": "This is the technical practical assessment project.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fahadewu/technical_practical_assessment_md_fahad_mia.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/fahadewu/technical_practical_assessment_md_fahad_mia/issues"
+  },
+  "homepage": "https://github.com/fahadewu/technical_practical_assessment_md_fahad_mia#readme",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mongoose": "^9.1.1",
+    "redis": "^5.10.0"
+  }
+}
