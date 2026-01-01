@@ -11,6 +11,8 @@ const redisClient = connectRedis();
 
 app.use(express.json());
 
+app.use('/auth', require('./routes/authRoutes'));
+
 app.get('/', (req, res) => {
     res.send('API is running...');
 });
