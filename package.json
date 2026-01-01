@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/fahadewu/technical_practical_assessment_md_fahad_mia#readme",
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "mongoose": "^9.1.1",
