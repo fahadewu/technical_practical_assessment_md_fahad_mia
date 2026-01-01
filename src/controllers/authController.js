@@ -13,10 +13,21 @@ const register = async (req, res) => {
         user = new User({ email, password });
         await user.save();
 
-        res.status(201).json({ message: 'User registered successfully' });
+        res.status(201).json({ 
+            success: true,
+            message: 'User registered successfully',
+            user: {
+                id: user._id,
+                email: user.email
+            }
+        });
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Server Error');
+        res.status(500).json({ 
+            success: false,
+            message: 'Server error during registration',
+            error: err.message 
+        });
     }
 };
 
@@ -46,12 +57,21 @@ const login = async (req, res) => {
             { expiresIn: '1h' },
             (err, token) => {
                 if (err) throw err;
-                res.json({ token });
+                res.json({ 
+                    success: true,
+                    message: 'Login successful',
+                    token,
+                    expiresIn: '1 hour'
+                });
             }
         );
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Server Error');
+        res.status(500).json({ 
+            success: false,
+            message: 'Server error during login',
+            error: err.message 
+        });
     }
 };
 

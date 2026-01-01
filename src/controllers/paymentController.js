@@ -75,7 +75,8 @@ const generateOTP = async (req, res) => {
         }
 
         res.json({ 
-            message: 'OTP sent successfully',
+            success: true,
+            message: 'OTP sent successfully to your email',
             email: email,
             expiresIn: '2 minutes'
         });
@@ -83,6 +84,7 @@ const generateOTP = async (req, res) => {
     } catch (err) {
         console.error('OTP Generation Error:', err.message);
         res.status(500).json({ 
+            success: false,
             message: 'Failed to send OTP',
             error: err.message 
         });
@@ -143,11 +145,19 @@ const verifyPayment = async (req, res) => {
 
         await redisClient.disconnect();
 
-        res.json({ message: 'Payment processed', order });
+        res.json({ 
+            success: true,
+            message: `Payment ${order.status.toLowerCase()} successfully`,
+            order
+        });
 
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Server Error');
+        res.status(500).json({ 
+            success: false,
+            message: 'Server error while processing payment',
+            error: err.message 
+        });
     }
 };
 

@@ -16,7 +16,12 @@ const getMyOrders = async (req, res) => {
         if (cachedOrders) {
             console.log('Serving from Cache');
             await redisClient.disconnect();
-            return res.json(JSON.parse(cachedOrders));
+            return res.json({
+                success: true,
+                message: 'Orders retrieved successfully',
+                source: 'cache',
+                orders: JSON.parse(cachedOrders)
+            });
         }
 
         console.log('Serving from MongoDB');
@@ -30,11 +35,20 @@ const getMyOrders = async (req, res) => {
 
         await redisClient.disconnect();
 
-        res.json(orders);
+        res.json({
+            success: true,
+            message: 'Orders retrieved successfully',
+            source: 'database',
+            orders
+        });
 
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Server Error');
+        res.status(500).json({ 
+            success: false,
+            message: 'Server error while retrieving orders',
+            error: err.message 
+        });
     }
 };
 
@@ -50,10 +64,18 @@ const createOrder = async (req, res) => {
         });
 
         await order.save();
-        res.status(201).json(order);
+        res.status(201).json({
+            success: true,
+            message: 'Order created successfully',
+            order
+        });
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Server Error');
+        res.status(500).json({ 
+            success: false,
+            message: 'Server error while creating order',
+            error: err.message 
+        });
     }
 };
 
