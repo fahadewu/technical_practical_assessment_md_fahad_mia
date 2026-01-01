@@ -1,12 +1,5 @@
 # 🚀 Betopia - Order & Payment API with Email OTP Verification
 
-[![Node.js](https://img.shields.io/badge/Node.js-16.x+-green.svg)](https://nodejs.org/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-5.x+-green.svg)](https://www.mongodb.com/)
-[![Redis](https://img.shields.io/badge/Redis-7.x+-red.svg)](https://redis.io/)
-[![Express.js](https://img.shields.io/badge/Express.js-4.x-blue.svg)](https://expressjs.com/)
-
-A secure and scalable **Order & Payment API** built with Node.js, MongoDB, and Redis. This project implements a mandatory **Email OTP verification system** before payment processing, along with **JWT-based authentication** and **intelligent Redis caching** for optimal performance.
-
 ## 📋 Table of Contents
 - [Project Overview](#-project-overview)
 - [Technology Stack](#-technology-stack)
