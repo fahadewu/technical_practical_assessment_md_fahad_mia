@@ -38,4 +38,23 @@ const getMyOrders = async (req, res) => {
     }
 };
 
-module.exports = { getMyOrders };
+const createOrder = async (req, res) => {
+    try {
+        const { amount } = req.body;
+        const userId = req.user.id;
+
+        const order = new Order({
+            userId,
+            amount,
+            status: 'PENDING'
+        });
+
+        await order.save();
+        res.status(201).json(order);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+};
+
+module.exports = { getMyOrders, createOrder };
