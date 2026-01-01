@@ -12,6 +12,7 @@ const redisClient = connectRedis();
 app.use(express.json());
 
 app.use('/auth', require('./routes/authRoutes'));
+app.use('/payment', require('./routes/paymentRoutes'));
 
 app.get('/', (req, res) => {
     res.send('API is running...');
