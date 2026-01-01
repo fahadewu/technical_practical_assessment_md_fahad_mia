@@ -12,41 +12,78 @@ const generateOTP = async (req, res) => {
 
         const email = user.email;
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const redisKey = `otp:${email}`;
 
         // Store OTP in Redis with 120 seconds expiration
         const redisClient = await connectRedis();
-        if (redisClient) {
-            await redisClient.set(email, otp, {
-                EX: 120
-            });
-            await redisClient.disconnect();
-        } else {
+        if (!redisClient) {
             return res.status(500).json({ message: 'Redis connection failed' });
         }
 
-        // Send OTP via Email
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            }
+        await redisClient.set(redisKey, otp, {
+            EX: 120
+        });
+        await redisClient.disconnect();
+        console.log(`OTP generated for ${email}: ${otp} (valid for 120 seconds)`);
+
+        // Send OTP via Email to user
+        try {
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: process.env.EMAIL_USER,
+                    pass: process.env.EMAIL_PASS
+                },
+                tls: {
+                    rejectUnauthorized: false
+                }
+            });
+
+            // Verify transporter configuration
+            await transporter.verify();
+            console.log('SMTP connection verified successfully');
+
+            const mailOptions = {
+                from: process.env.EMAIL_USER,
+                to: email,
+                subject: 'Your OTP Code - Betopia Payment Verification',
+                text: `Hello,\n\nYour OTP code for payment verification is: ${otp}\n\nThis code will expire in 2 minutes (120 seconds).\n\nIf you did not request this code, please ignore this email.\n\nBest regards,\nBetopia Team`,
+                html: `
+                    <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto;">
+                        <h2 style="color: #333;">OTP Verification Code</h2>
+                        <p>Hello,</p>
+                        <p>Your OTP code for payment verification is:</p>
+                        <div style="background-color: #f4f4f4; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; margin: 20px 0;">
+                            ${otp}
+                        </div>
+                        <p>This code will expire in <strong>2 minutes (120 seconds)</strong>.</p>
+                        <p>If you did not request this code, please ignore this email.</p>
+                        <p>Best regards,<br>Betopia Team</p>
+                    </div>
+                `
+            };
+
+            const info = await transporter.sendMail(mailOptions);
+            console.log(`OTP email sent successfully to ${email}`);
+            console.log('Message ID:', info.messageId);
+        } catch (emailError) {
+            console.error('Email sending failed:', emailError.message);
+            console.error('Full error:', emailError);
+            throw new Error(`Email failed: ${emailError.message}. Please check EMAIL_USER and EMAIL_PASS in .env file.`);
+        }
+
+        res.json({ 
+            message: 'OTP sent successfully',
+            email: email,
+            expiresIn: '2 minutes'
         });
 
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject: 'Your OTP Code',
-            text: `Your OTP code is ${otp}. It expires in 2 minutes.`
-        };
-
-        await transporter.sendMail(mailOptions);
-
-        res.json({ message: 'OTP sent successfully' });
-
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+        console.error('OTP Generation Error:', err.message);
+        res.status(500).json({ 
+            message: 'Failed to send OTP',
+            error: err.message 
+        });
     }
 };
 
@@ -64,15 +101,17 @@ const verifyPayment = async (req, res) => {
             return res.status(500).json({ message: 'Redis connection failed' });
         }
 
-        const storedOTP = await redisClient.get(user.email);
+        const redisKey = `otp:${user.email}`;
+        const storedOTP = await redisClient.get(redisKey);
 
         if (!storedOTP || storedOTP !== otp) {
             await redisClient.disconnect();
             return res.status(400).json({ message: 'Invalid or expired OTP' });
         }
 
-        // OTP Verified, delete it
-        await redisClient.del(user.email);
+        // OTP Verified, delete it (one-time use)
+        await redisClient.del(redisKey);
+        console.log(`OTP verified and deleted for user: ${user.email}`);
 
         // Process Mock Payment
         const order = await Order.findById(orderId);
